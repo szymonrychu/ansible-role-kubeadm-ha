@@ -1,0 +1,27 @@
+---
+- name: Add Kubernetes APT GPG key
+  when: ansible_os_family == "Debian"
+  apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    state: present
+
+- name: Add Kubernetes APT repository
+  apt_repository:
+    repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
+    state: present
+    filename: 'kubernetes'
+
+- name: Install Kubernetes packages 
+  apt:
+    name: "{{ item }}"
+    update_cache: yes
+    state: present
+  with_items: "{{ kubernetes_pkgs_ver }}"
+  notify:
+    - Reload kubelet daemon
+
+- name: Prevent Kubernetes packages from being upgraded
+  ansible.builtin.dpkg_selections:
+    name: "{{ item }}"
+    selection: hold
+  with_items: "{{ kubeadm_pkgs }}"

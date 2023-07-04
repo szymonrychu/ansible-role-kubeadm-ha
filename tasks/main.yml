@@ -1,0 +1,35 @@
+---
+
+# - name: p1
+#   ansible.builtin.debug:
+#     var: kubeadm_master_node_hostname_ip
+
+# - name: p2
+#   ansible.builtin.debug:
+#     var: kubeadm_master_node_ips
+
+# - name: p3
+#   ansible.builtin.debug:
+#     var: dict(kubeadm_master_node_hostnames | zip(kubeadm_master_node_ips))
+
+- name: Install and configure haproxy
+  include_tasks: haproxy.yml
+
+- name: Install and configure keepalived
+  include_tasks: keepalived.yml
+
+- name: Install (Debian/Ubuntu) Kubernetes
+  include_tasks: kubeadm-pkgs.yml
+
+- name: Kubernetes pre-init tasks
+  include_tasks: kubeadm-pre-init.yml
+
+- name: Kubernetes reset
+  when: perform_kubeadm_reset
+  include_tasks: kubeadm-reset.yml
+
+- name: Kubernetes init
+  include_tasks: kubeadm-init.yml
+
+- name: Kubernetes init
+  include_tasks: kubeadm-post-init.yml

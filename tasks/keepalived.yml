@@ -1,0 +1,23 @@
+---
+
+- name: Install keepalived
+  apt:
+    name: keepalived
+    update_cache: yes
+    state: present
+  notify:
+    - Reload keepalived daemon
+
+- name: Configure keepalived
+  template:
+    src: keepalived.conf.j2
+    dest: /etc/keepalived/keepalived.conf
+  notify:
+    - Reload keepalived daemon
+
+- name: Configure keepalived check_apiserver.sh
+  template:
+    src: check_apiserver.sh.j2
+    dest: /etc/keepalived/check_apiserver.sh
+  notify:
+    - Reload keepalived daemon

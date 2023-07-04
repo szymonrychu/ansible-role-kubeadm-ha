@@ -1,0 +1,46 @@
+---
+
+- name: Init Kubernetes on 1st master
+  when: kubeadm_master_node_hostnames[0] == ansible_hostname
+  shell:
+    cmd: |
+      kubeadm init \
+        --apiserver-bind-port 6443 \
+        --pod-network-cidr {{ kubernetes_pod_network_cidr }} \
+        --control-plane-endpoint "{{ kubernetes_api_server_virtual_ip }}:{{ kubernetes_api_server_virtual_port }}" \
+        --apiserver-cert-extra-sans "{{ kubernetes_extra_sans }}" \
+        --kubernetes-version "{{ kubernetes_version }}" \
+        --token "{{ kubernetes_token }}" \
+        --token-ttl 0 \
+        --upload-certs
+    creates: /etc/kubernetes/pki/apiserver.key
+
+- name: Get Kubeadm join other masters command
+  when: kubeadm_master_node_hostnames[0] == ansible_hostname
+  shell:
+    cmd: kubeadm token create --print-join-command
+  register: kubeadm_join_raw
+
+- name: Get Kubeadm cert key
+  when: kubeadm_master_node_hostnames[0] == ansible_hostname
+  shell:
+    cmd: kubeadm init phase upload-certs --upload-certs | grep -vw -e certificate -e Namespace
+  register: kubeadm_cert_key_raw
+
+- name: Load join command parts into facts
+  when: kubeadm_master_node_hostnames[0] == ansible_hostname
+  set_fact:
+    kubeadm_join: "{{ kubeadm_join_raw.stdout_lines[0] }}"
+    kubeadm_cert_key: "{{ kubeadm_cert_key_raw.stdout_lines[0] }}"
+  delegate_to: "{{ item }}"
+  with_items: "{{ play_hosts }}"
+  run_once: true
+
+- name: Join other masters
+  when: kubeadm_master_node_hostnames[0] != ansible_hostname
+  shell:
+    cmd: |
+      {{ kubeadm_join }} --control-plane --certificate-key {{ kubeadm_cert_key }}
+    creates: /etc/kubernetes/pki/apiserver.key
+
+

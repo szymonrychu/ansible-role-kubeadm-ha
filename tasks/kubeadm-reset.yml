@@ -1,0 +1,9 @@
+---
+
+- name: Reset Kubernetes component
+  shell: 
+    cmd: kubeadm reset --force
+    removes: /etc/kubernetes/pki/apiserver.key
+  notify:
+    - Remove after kubeadm reset
+

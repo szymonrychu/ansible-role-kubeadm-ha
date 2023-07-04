@@ -1,0 +1,16 @@
+---
+
+- name: Install haproxy
+  apt:
+    name: haproxy
+    update_cache: yes
+    state: present
+  notify:
+    - Reload haproxy daemon
+
+- name: Configure haproxy
+  template:
+    src: haproxy.cfg.j2
+    dest: /etc/haproxy/haproxy.cfg
+  notify:
+    - Reload haproxy daemon

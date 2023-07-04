@@ -1,0 +1,31 @@
+global_defs {
+  router_id LVS_DEVEL
+}
+vrrp_script check_apiserver {
+  script "/etc/keepalived/check_apiserver.sh"
+  interval 3
+  weight -2
+  fall 10
+  rise 2
+}
+
+vrrp_instance VI_1 {
+{% if kubeadm_master_node_hostnames[0] == ansible_hostname %}
+  state MASTER
+{% else %}
+  state BACKUP
+{% endif %}
+  interface {{ ansible_default_ipv4.interface }}
+  virtual_router_id {{ keepalived_router_id }}
+  priority {{ keepalived_haproxy_priority }}
+  authentication {
+    auth_type PASS
+    auth_pass {{ keepalived_pass }}
+  }
+  virtual_ipaddress {
+    {{ kubernetes_api_server_virtual_ip }}
+  }
+  track_script {
+    check_apiserver
+  }
+}

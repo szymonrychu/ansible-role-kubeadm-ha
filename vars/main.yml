@@ -1,0 +1,33 @@
+---
+
+perform_kubeadm_reset: true
+
+keepalived_pass: "42"
+keepalived_router_id: 51
+keepalived_haproxy_priority: 101
+
+kubeadm_version: 1.25.6-00
+kubernetes_cni_version: 1.2.0-00
+kubernetes_version: 1.25.6
+kubernetes_token: nms1cr.7qbkasmennrksps4
+
+kubeadm_pkgs:
+  - kubelet
+  - kubeadm
+
+kubernetes_cni_pkgs:
+  - kubernetes-cni
+
+kubernetes_pod_network_cidr: 10.244.0.0/16
+kubernetes_extra_sans: szymonrichert.pl,kubernetes.lan,nuc1.lan,nuc2.lan,nuc3.lan
+
+kubernetes_api_server_virtual_ip: 192.168.1.64
+kubernetes_api_server_virtual_port: 8443
+
+# please do not edit variables below
+kubeadm_master_node_hostnames: "{{ groups['kubeadm_masters'] | map('extract', hostvars, ['inventory_hostname']) | map('join') | list }}"
+kubeadm_master_node_ips: "{{ groups['kubeadm_masters'] | map('extract', hostvars, ['ansible_default_ipv4', 'address']) | map('join') | list }}"
+kubeadm_master_node_hostname_ip: "{{ dict(kubeadm_master_node_hostnames | zip(kubeadm_master_node_ips)) }}"
+kubeadm_pkgs_ver: "{{ kubeadm_pkgs | product(['=']) | map('join') | product([kubeadm_version]) | map('join') | list }}"
+kubernetes_cni_pkgs_ver: "{{ kubernetes_cni_pkgs | product(['=']) | map('join') | product([kubernetes_cni_version]) | map('join') | list }}"
+kubernetes_pkgs_ver: "{{ kubeadm_pkgs_ver + kubernetes_cni_pkgs_ver }}"

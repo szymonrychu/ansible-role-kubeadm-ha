@@ -1,0 +1,26 @@
+- name: Reload haproxy daemon
+  systemd:
+    name: haproxy
+    daemon_reload: yes
+    enabled: yes
+
+- name: Reload keepalived daemon
+  systemd:
+    name: keepalived
+    daemon_reload: yes
+    enabled: yes
+
+- name: Remove after kubeadm reset
+  shell: "rm -rf {{ item }}"
+  with_items:
+    - /etc/cni/net.d
+
+
+- name: Reload kubelet daemon
+  systemd:
+    name: kubelet
+    daemon_reload: yes
+    enabled: yes
+
+- name: Reload sysctl
+  shell: sysctl -p
