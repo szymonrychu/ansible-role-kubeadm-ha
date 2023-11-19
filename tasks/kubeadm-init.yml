@@ -42,5 +42,3 @@
     cmd: |
       {{ kubeadm_join }} --control-plane --certificate-key {{ kubeadm_cert_key }}
     creates: /etc/kubernetes/pki/apiserver.key
-
-

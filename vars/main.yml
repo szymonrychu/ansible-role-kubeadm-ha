@@ -1,14 +1,14 @@
 ---
 
-perform_kubeadm_reset: true
+perform_kubeadm_reset: false
 
 keepalived_pass: "42"
 keepalived_router_id: 51
 keepalived_haproxy_priority: 101
 
-kubeadm_version: 1.25.6-00
+kubeadm_version: 1.28.2-00
 kubernetes_cni_version: 1.2.0-00
-kubernetes_version: 1.25.6
+kubernetes_version: 1.28.2
 kubernetes_token: nms1cr.7qbkasmennrksps4
 
 kubeadm_pkgs:
